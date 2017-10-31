@@ -23,11 +23,13 @@ public class TimedPay implements WurmServerMod, Initable, PreInitable, Configura
 
     private static Logger logger = Logger.getLogger("org.gotti.wurmunlimited.mods.timedpaymod.TimedPayMod");
     private int amountCash;
+    private int amountKarma;
     private int payoutInterval;
 
     @Override
     public void configure(Properties properties) {
         amountCash = Integer.parseInt(properties.getProperty("amountCash"));
+        amountKarma = Integer.parseInt(properties.getProperty("amountKarma"));
         payoutInterval = 8 * Integer.parseInt(properties.getProperty("payoutInterval"));
     }
 
@@ -56,7 +58,7 @@ public class TimedPay implements WurmServerMod, Initable, PreInitable, Configura
             for (Player player : playerList) {
                 String steamId = player.SteamId;
                 if (!processedSteamIds.contains(steamId)) {
-                    addMoney(player);
+                    addMoneyAndKarma(player);
                     processedSteamIds.add(steamId);
                 }
             }
@@ -65,11 +67,23 @@ public class TimedPay implements WurmServerMod, Initable, PreInitable, Configura
     }
 
 
-    public void addMoney(Player player) {
+    public void addMoneyAndKarma(Player player) {
         try {
-            logger.log(Level.INFO, "paying player: " + player.getName());
-            player.addMoney(amountCash);
-
+            StringBuilder sb = new StringBuilder();
+            if(amountCash > 0) {
+                sb.append("Giving cash ");
+                player.addMoney(amountCash);
+            }
+            if(amountKarma > 0) {
+                if(sb.length() > 0) {
+                    sb.append("and karma ");
+                } else {
+                    sb.append("Giving karma ");
+                }
+                player.setKarma(player.getKarma() + amountKarma);
+            }
+            sb.append("to player " + player.getName());
+            logger.log(Level.INFO, sb.toString());
         } catch (IOException e) {
 
         }

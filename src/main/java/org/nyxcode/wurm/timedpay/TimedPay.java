@@ -3,6 +3,7 @@ package org.nyxcode.wurm.timedpay;
 import com.wurmonline.server.Players;
 import com.wurmonline.server.WurmCalendar;
 import com.wurmonline.server.players.Player;
+import com.wurmonline.server.steam.SteamId;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
 import org.gotti.wurmunlimited.modloader.interfaces.Configurable;
 import org.gotti.wurmunlimited.modloader.interfaces.Initable;
@@ -21,7 +22,7 @@ public class TimedPay implements WurmServerMod, Initable, PreInitable, Configura
 
     long lastPayout;
 
-    private static Logger logger = Logger.getLogger("org.gotti.wurmunlimited.mods.timedpaymod.TimedPayMod");
+    private static Logger logger = Logger.getLogger("org.nyxcode.wurm.timedpay.TimedPay");
     private int amountCash;
     private int amountKarma;
     private int payoutInterval;
@@ -49,14 +50,14 @@ public class TimedPay implements WurmServerMod, Initable, PreInitable, Configura
     }
 
     public long addMoneyToLoggedPlayers(Players players) {
-        Set<String> processedSteamIds = new HashSet<>();
+        Set<SteamId> processedSteamIds = new HashSet<>();
         long currentTime = WurmCalendar.getCurrentTime();
         if (currentTime > lastPayout + payoutInterval) {
             logger.log(Level.FINE, "executing payout");
             lastPayout = currentTime;
             List<Player> playerList = Arrays.asList(players.getPlayers());
             for (Player player : playerList) {
-                String steamId = player.SteamId;
+                SteamId steamId = player.getSteamId();
                 if (!processedSteamIds.contains(steamId)) {
                     addMoneyAndKarma(player);
                     processedSteamIds.add(steamId);
